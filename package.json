@@ -1,10 +1,16 @@
 {
-  "name": "franklin-service",
+  "name": "clawrouter-service",
   "version": "1.0.0",
+  "description": "ClawRouter proxy for Franklin Agent",
+  "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "node index.js"
   },
   "dependencies": {
-    "@blockrun/franklin": "latest"
+    "@blockrun/clawrouter": "latest"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
