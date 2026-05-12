@@ -1,10 +1,6 @@
 // index.js
 const { spawn } = require('child_process');
 const http = require('http');
-const httpProxy = require('http-proxy');
-
-// Install http-proxy first: npm install http-proxy
-// Or use this simpler version without extra dependencies:
 
 const PORT = process.env.PORT || 10000;
 
