@@ -1,27 +1,59 @@
 // index.js
 const { spawn } = require('child_process');
-const { createServer } = require('net');
+const http = require('http');
+const httpProxy = require('http-proxy');
+
+// Install http-proxy first: npm install http-proxy
+// Or use this simpler version without extra dependencies:
 
 const PORT = process.env.PORT || 10000;
 
 // Start ClawRouter as a child process
 const clawrouter = spawn('npx', ['@blockrun/clawrouter', 'start'], {
-  stdio: 'inherit',
+  stdio: 'pipe',
   shell: true
 });
 
-// Create a simple TCP proxy to forward traffic from 0.0.0.0:PORT to 127.0.0.1:8402
-const proxy = createServer((socket) => {
-  const target = require('net').createConnection(8402, '127.0.0.0', () => {
-    socket.pipe(target);
-    target.pipe(socket);
+// Forward ClawRouter's output to console
+clawrouter.stdout.on('data', (data) => console.log(data.toString()));
+clawrouter.stderr.on('data', (data) => console.error(data.toString()));
+
+// Create an HTTP proxy server
+const server = http.createServer((req, res) => {
+  console.log(`Request: ${req.method} ${req.url}`);
+  
+  // Handle root path for health checks
+  if (req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('ClawRouter Proxy is running\n');
+    return;
+  }
+  
+  // Proxy all other requests to ClawRouter
+  const options = {
+    hostname: '127.0.0.1',
+    port: 8402,
+    path: req.url,
+    method: req.method,
+    headers: req.headers
+  };
+  
+  const proxyReq = http.request(options, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res, { end: true });
   });
-  target.on('error', () => socket.end());
-  socket.on('error', () => target.end());
+  
+  proxyReq.on('error', (err) => {
+    console.error('Proxy error:', err.message);
+    res.writeHead(502, { 'Content-Type': 'text/plain' });
+    res.end('Bad Gateway: Unable to reach ClawRouter');
+  });
+  
+  req.pipe(proxyReq, { end: true });
 });
 
-proxy.listen(PORT, '0.0.0.0', () => {
-  console.log(`Proxy listening on 0.0.0.0:${PORT} -> 127.0.0.1:8402`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`HTTP proxy listening on 0.0.0.0:${PORT}`);
 });
 
 clawrouter.on('error', (err) => {
@@ -31,6 +63,6 @@ clawrouter.on('error', (err) => {
 
 process.on('SIGTERM', () => {
   clawrouter.kill();
-  proxy.close();
+  server.close();
   process.exit(0);
 });
