@@ -2,7 +2,7 @@
   "name": "clawrouter-service",
   "version": "1.0.0",
   "scripts": {
-    "start": "bash start.sh"
+    "start": "node index.js"
   },
   "dependencies": {
     "@blockrun/clawrouter": "latest"
