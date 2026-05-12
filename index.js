@@ -12,7 +12,7 @@ const clawrouter = spawn('npx', ['@blockrun/clawrouter', 'start'], {
 
 // Create a simple TCP proxy to forward traffic from 0.0.0.0:PORT to 127.0.0.1:8402
 const proxy = createServer((socket) => {
-  const target = require('net').createConnection(8402, '127.0.0.1', () => {
+  const target = require('net').createConnection(8402, '0.0.0.0', () => {
     socket.pipe(target);
     target.pipe(socket);
   });
