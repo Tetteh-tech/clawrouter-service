@@ -1,0 +1,10 @@
+{
+  "name": "clawrouter-service",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "clawrouter start"
+  },
+  "dependencies": {
+    "@blockrun/clawrouter": "latest"
+  }
+}
