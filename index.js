@@ -5,7 +5,7 @@ const http = require('http');
 const PORT = process.env.PORT || 10000;
 
 // Start ClawRouter process
-const clawrouter = spawn('npx', ['@blockrun/clawrouter', 'start'], {
+const clawrouter = spawn('npx', ['@blockrun/franklin', 'start'], {
   stdio: 'pipe',
   shell: true
 });
